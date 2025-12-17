@@ -19,7 +19,17 @@ public class BaseInitData {
             work1();
         };
     }
+
     private void work1(){
         log.debug("Post entity 개수: {}",postService.count());
+        if (postService.count() == 0){
+            for (int i = 1; i <= 10; i++) {
+                String title = "Sample Post Title " + i;
+                String content = "This is the content of sample post number " + i + ".";
+                String author = "Author" + i;
+                Post post = postService.create(title, content, author);
+                log.debug("Created Post: {}", post);
+            }
+        }
     }
 }

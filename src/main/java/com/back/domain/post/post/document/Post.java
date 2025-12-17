@@ -31,6 +31,26 @@ public class Post {
             format = DateFormat.date_time
     )
     private OffsetDateTime lastModifiedAt;
+
+    public Post(String title, String content, String author){
+        this.title = title;
+        this.content = content;
+        this.author = author;
+        this.createdAt = OffsetDateTime.now();
+        this.lastModifiedAt = OffsetDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", author='" + author + '\'' +
+                ", createdAt=" + createdAt +
+                ", lastModifiedAt=" + lastModifiedAt +
+                '}';
+    }
 }
 
 
