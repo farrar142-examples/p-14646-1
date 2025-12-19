@@ -35,4 +35,12 @@ public class CommentService {
     public List<Comment> findByPostId(String postId) {
         return commentRepository.findByPostId(postId);
     }
+
+    public Comment update(String id, String content) {
+        Comment comment = findById(id);
+        if (content != null){
+            comment.setContent(content);
+        }
+        return commentRepository.save(comment);
+    }
 }
