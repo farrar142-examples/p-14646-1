@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 @SpringBootApplication
 @EnableElasticsearchRepositories
+@EnableElasticsearchAuditing
 public class BackApplication {
 
 	public static void main(String[] args) {
