@@ -75,4 +75,16 @@ public class CommentController {
         postService.findById(postId);
         return commentService.update(id, request.content);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable String postId,
+            @PathVariable String id
+    ) {
+        // Post 존재 여부 확인
+        postService.findById(postId);
+        Comment comment = commentService.findById(id);
+        commentService.delete(comment);
+        return ResponseEntity.noContent().build();
+    }
 }

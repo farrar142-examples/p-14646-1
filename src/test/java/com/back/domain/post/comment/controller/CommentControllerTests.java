@@ -207,4 +207,32 @@ public class CommentControllerTests extends BaseTest {
             .andExpect(jsonPath("id").value(comment.getId()))
             .andExpect(jsonPath("content").value("Updated Comment Content"));
     }
+
+    @Test
+    @DisplayName("DELETE /api/v1/posts/{postId}/comments/{id} - 실패 (존재하지 않는 commentId)")
+    void t10() throws Exception {
+        Post post = createTestPost();
+        mockMvc.perform(
+            delete("/api/v1/posts/{postId}/comments/{id}", post.getId(), "nonexistent-comment-id")
+                .contentType("application/json")
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/posts/{postId}/comments/{id} - 성공")
+    void t11() throws Exception {
+        Post post = createTestPost();
+        Comment comment = createTestComment(post.getId());
+
+        mockMvc.perform(
+            delete("/api/v1/posts/{postId}/comments/{id}", post.getId(), comment.getId())
+                .contentType("application/json")
+        ).andExpect(status().isNoContent());
+
+        // 삭제 후 재조회 시 404 응답 확인
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/{id}", post.getId(), comment.getId())
+                .contentType("application/json")
+        ).andExpect(status().isNotFound());
+    }
 }
