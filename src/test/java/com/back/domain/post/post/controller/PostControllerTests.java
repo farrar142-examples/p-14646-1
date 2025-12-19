@@ -203,5 +203,41 @@ public class PostControllerTests extends BaseTest {
             .andExpect(jsonPath("id").value(createdPost.getId()))
             .andExpect(jsonPath("title").value("Updated Title"))
             .andExpect(jsonPath("content").value("Updated Content"));
-    }       
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/posts/{id} - 실패")
+    void t9() throws Exception {
+        mockMvc.perform(
+                delete("/api/v1/posts/{id}", "nonexistent-id")
+                        .contentType("application/json")
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/posts/{id} - 성공")
+    void t10() throws Exception {
+        // 먼저 포스트를 생성
+        String response = mockMvc.perform(
+            post("/api/v1/posts")
+                .contentType("application/json")
+                .content(
+                    objectMapper.writeValueAsBytes(
+                        new PostController.CreatePostRequest(
+                            "Test Title for Delete",
+                            "Test Content for Delete",
+                            "Test Author for Delete"
+                        )
+                    )
+                )
+            ).andExpect(status().isCreated())
+            .andReturn().getResponse()
+            .getContentAsString();
+        Post createdPost = objectMapper.readValue(response, Post.class);
+        // 이제 삭제 요청을 보냄
+        mockMvc.perform(
+                delete("/api/v1/posts/{id}", createdPost.getId())
+                        .contentType("application/json")
+        ).andExpect(status().isNoContent());
+    }
 }
