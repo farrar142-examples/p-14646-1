@@ -49,4 +49,26 @@ public class PostController {
     public Post findById(@PathVariable String id) {
         return postService.findById(id);
     }
+
+    record UpdatePostRequest(
+            @NotBlank(message = "Title must not be blank")
+            @Size(max = 100, min = 1)
+            String title,
+            @NotBlank(message = "Content must not be blank")
+            String content
+    ){}
+
+    @PutMapping("/{id}")
+    public Post update(
+            @PathVariable String id,
+            @RequestBody @Valid UpdatePostRequest request
+    ) {
+        return postService.update(
+                id,
+                request.title,
+                request.content
+        );
+    }
+
+
 }
