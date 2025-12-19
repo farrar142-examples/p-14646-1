@@ -39,4 +39,9 @@ public class PostController {
         );
         return ResponseEntity.status(201).body(post);
     }
+
+    @RequestMapping
+    public List<Post> findAll(){
+        return postService.findAll();
+    }
 }
