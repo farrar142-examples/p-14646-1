@@ -78,5 +78,15 @@ public class BaseInitData {
 
     private void work6() {
         log.debug("Comment 개수: {}", commentService.count());
+        if (commentService.count() == 0) {
+            log.debug("샘플 Comment 데이터 생성");
+            for (int i = 1; i <= 5; i++) {
+                Post post = postService.create("Post for Comment " + i, "Content for post " + i, "Author" + i);
+                String content = "This is a comment number " + i + " for post " + post.getId();
+                String author = "Commenter" + i;
+                var comment = commentService.create(post, content, author);
+                log.debug("Created Comment: {}", comment);
+            }
+        }
     }
 }
