@@ -144,4 +144,29 @@ public class CommentControllerTests extends BaseTest {
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$.length()").value(2));
     }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments/{id} - 실패 (존재하지 않는 commentId)")
+    void t6() throws Exception {
+        Post post = createTestPost();
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/{id}", post.getId(), "nonexistent-comment-id")
+                .contentType("application/json")
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments/{id} - 성공")
+    void t7() throws Exception {
+        Post post = createTestPost();
+        Comment comment = createTestComment(post.getId());
+
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/{id}", post.getId(), comment.getId())
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("id").value(comment.getId()))
+            .andExpect(jsonPath("content").value("Test Comment Content"))
+            .andExpect(jsonPath("author").value("Test Comment Author"));
+    }
 }
