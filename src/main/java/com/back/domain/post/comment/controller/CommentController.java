@@ -7,10 +7,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts/{postId}/comments")
@@ -43,10 +44,15 @@ public class CommentController {
     }
 
     @GetMapping
-    public List<Comment> findByPostId(@PathVariable String postId) {
+    public Page<Comment> findByPostId(
+            @PathVariable String postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
         // Post 존재 여부 확인
         postService.findById(postId);
-        return commentService.findByPostId(postId);
+        Pageable pageable = PageRequest.of(page, size);
+        return commentService.findByPostId(postId, pageable);
     }
 
     @GetMapping("/{id}")

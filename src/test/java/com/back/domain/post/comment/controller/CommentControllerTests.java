@@ -141,8 +141,10 @@ public class CommentControllerTests extends BaseTest {
             get("/api/v1/posts/{postId}/comments", post.getId())
                 .contentType("application/json")
         ).andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+            .andExpect(jsonPath("$.pageable.pageSize").value(10));
     }
 
     @Test
@@ -234,5 +236,50 @@ public class CommentControllerTests extends BaseTest {
             get("/api/v1/posts/{postId}/comments/{id}", post.getId(), comment.getId())
                 .contentType("application/json")
         ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments - Pagination 파라미터 테스트")
+    void t12() throws Exception {
+        Post post = createTestPost();
+
+        // 15개의 Comment 생성
+        for (int i = 0; i < 15; i++) {
+            mockMvc.perform(
+                post("/api/v1/posts/{postId}/comments", post.getId())
+                    .contentType("application/json")
+                    .content(
+                        objectMapper.writeValueAsBytes(
+                            Map.of(
+                                "content", "Pagination Test Content " + i,
+                                "author", "Pagination Test Author"
+                            )
+                        )
+                    )
+            ).andExpect(status().isCreated());
+        }
+
+        // 첫 번째 페이지 조회 (size=5)
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments", post.getId())
+                .param("page", "0")
+                .param("size", "5")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(5))
+            .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+            .andExpect(jsonPath("$.pageable.pageSize").value(5));
+
+        // 두 번째 페이지 조회 (size=5)
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments", post.getId())
+                .param("page", "1")
+                .param("size", "5")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.pageable.pageNumber").value(1))
+            .andExpect(jsonPath("$.pageable.pageSize").value(5));
     }
 }

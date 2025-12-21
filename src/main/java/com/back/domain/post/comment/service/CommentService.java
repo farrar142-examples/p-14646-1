@@ -1,14 +1,17 @@
 package com.back.domain.post.comment.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.back.domain.post.comment.document.Comment;
 import com.back.domain.post.comment.repository.CommentRepository;
 import com.back.domain.post.post.document.Post;
 import com.back.global.exception.NotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,10 @@ public class CommentService {
 
     public List<Comment> findByPostId(String postId) {
         return commentRepository.findByPostId(postId);
+    }
+
+    public Page<Comment> findByPostId(String postId, Pageable pageable) {
+        return commentRepository.findByPostId(postId, pageable);
     }
 
     public Comment update(String id, String content) {
