@@ -50,6 +50,17 @@ public class PostController {
         return postService.findAll(pageable);
     }
 
+    @GetMapping("/search")
+    public Page<Post> search(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "titleAndContent") String searchType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return postService.search(keyword, searchType, pageable);
+    }
+
     @RequestMapping("/{id}")
     public Post findById(@PathVariable String id) {
         return postService.findById(id);

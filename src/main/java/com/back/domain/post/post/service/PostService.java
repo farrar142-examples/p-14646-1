@@ -34,6 +34,15 @@ public class PostService {
         return postRepository.findAll(pageable);
     }
 
+    public Page<Post> search(String keyword, String searchType, Pageable pageable) {
+        return switch (searchType) {
+            case "title" -> postRepository.findByTitleContaining(keyword, pageable);
+            case "content" -> postRepository.findByContentContaining(keyword, pageable);
+            case "titleAndContent" -> postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+            default -> postRepository.findAll(pageable);
+        };
+    }
+
     public Post findById(String id) {
         return postRepository.findById(id).orElseThrow(()->new NotFoundException("Post not found with id: " + id));
     }
