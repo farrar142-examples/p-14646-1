@@ -70,7 +70,7 @@ public class PostControllerTests extends BaseTest {
             get("/api/v1/posts")
                     .contentType("application/json")
                 ).andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.content").isArray());
     }
 
     @Test
@@ -239,5 +239,61 @@ public class PostControllerTests extends BaseTest {
                 delete("/api/v1/posts/{id}", createdPost.getId())
                         .contentType("application/json")
         ).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts - Pagination 파라미터 테스트")
+    void t11() throws Exception {
+        // 여러 포스트 생성
+        for (int i = 0; i < 15; i++) {
+            mockMvc.perform(
+                post("/api/v1/posts")
+                    .contentType("application/json")
+                    .content(
+                        objectMapper.writeValueAsBytes(
+                            new PostController.CreatePostRequest(
+                                "Pagination Test Title " + i,
+                                "Pagination Test Content " + i,
+                                "Pagination Test Author"
+                            )
+                        )
+                    )
+            ).andExpect(status().isCreated());
+        }
+
+        // 첫 번째 페이지 조회 (size=5)
+        mockMvc.perform(
+            get("/api/v1/posts")
+                .param("page", "0")
+                .param("size", "5")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(5))
+            .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+            .andExpect(jsonPath("$.pageable.pageSize").value(5));
+
+        // 두 번째 페이지 조회 (size=5)
+        mockMvc.perform(
+            get("/api/v1/posts")
+                .param("page", "1")
+                .param("size", "5")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.pageable.pageNumber").value(1))
+            .andExpect(jsonPath("$.pageable.pageSize").value(5));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts - 기본 Pagination (page=0, size=10)")
+    void t12() throws Exception {
+        mockMvc.perform(
+            get("/api/v1/posts")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+            .andExpect(jsonPath("$.pageable.pageSize").value(10));
     }
 }
