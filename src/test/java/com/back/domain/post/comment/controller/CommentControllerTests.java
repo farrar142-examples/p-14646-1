@@ -1,22 +1,26 @@
 package com.back.domain.post.comment.controller;
 
-import com.back.BaseTest;
-import com.back.domain.post.comment.document.Comment;
-import com.back.domain.post.post.document.Post;
+import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import tools.jackson.databind.ObjectMapper;
-
-import java.util.Map;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.back.BaseTest;
+import com.back.domain.post.comment.document.Comment;
+import com.back.domain.post.post.document.Post;
+
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @Testcontainers
@@ -281,5 +285,94 @@ public class CommentControllerTests extends BaseTest {
             .andExpect(jsonPath("$.content").isArray())
             .andExpect(jsonPath("$.pageable.pageNumber").value(1))
             .andExpect(jsonPath("$.pageable.pageSize").value(5));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments/search - 내용 검색")
+    void t13() throws Exception {
+        Post post = createTestPost();
+
+        // 검색용 Comment 생성
+        mockMvc.perform(
+            post("/api/v1/posts/{postId}/comments", post.getId())
+                .contentType("application/json")
+                .content(
+                    objectMapper.writeValueAsBytes(
+                        Map.of(
+                            "content", "UniqueSearchableContent",
+                            "author", "SearchAuthor"
+                        )
+                    )
+                )
+        ).andExpect(status().isCreated());
+
+        // 내용으로 검색
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/search", post.getId())
+                .param("keyword", "UniqueSearchableContent")
+                .param("searchType", "content")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content[0].content").value("UniqueSearchableContent"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments/search - 작성자 검색")
+    void t14() throws Exception {
+        Post post = createTestPost();
+
+        // 검색용 Comment 생성
+        mockMvc.perform(
+            post("/api/v1/posts/{postId}/comments", post.getId())
+                .contentType("application/json")
+                .content(
+                    objectMapper.writeValueAsBytes(
+                        Map.of(
+                            "content", "Content",
+                            "author", "UniqueSearchableAuthor"
+                        )
+                    )
+                )
+        ).andExpect(status().isCreated());
+
+        // 작성자로 검색
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/search", post.getId())
+                .param("keyword", "UniqueSearchableAuthor")
+                .param("searchType", "author")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content[0].author").value("UniqueSearchableAuthor"));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/posts/{postId}/comments/search - 내용+작성자 검색 (기본값)")
+    void t15() throws Exception {
+        Post post = createTestPost();
+
+        // 검색용 Comment 생성
+        mockMvc.perform(
+            post("/api/v1/posts/{postId}/comments", post.getId())
+                .contentType("application/json")
+                .content(
+                    objectMapper.writeValueAsBytes(
+                        Map.of(
+                            "content", "ContentAndAuthorSearchTest",
+                            "author", "TestAuthor"
+                        )
+                    )
+                )
+        ).andExpect(status().isCreated());
+
+        // 내용+작성자로 검색 (기본값)
+        mockMvc.perform(
+            get("/api/v1/posts/{postId}/comments/search", post.getId())
+                .param("keyword", "ContentAndAuthorSearchTest")
+                .contentType("application/json")
+        ).andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content[0].content").value("ContentAndAuthorSearchTest"));
     }
 }

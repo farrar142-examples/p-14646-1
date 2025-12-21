@@ -43,6 +43,17 @@ public class CommentService {
         return commentRepository.findByPostId(postId, pageable);
     }
 
+    public Page<Comment> search(String postId, String keyword, String searchType, Pageable pageable) {
+        return switch (searchType) {
+            case "content" -> commentRepository.findByPostIdAndContentContaining(postId, keyword, pageable);
+            case "author" -> commentRepository.findByPostIdAndAuthor(postId, keyword, pageable);
+            case "contentAndAuthor" -> commentRepository.findByPostIdAndContentContainingOrPostIdAndAuthor(
+                    postId, keyword, postId, keyword, pageable
+            );
+            default -> commentRepository.findByPostId(postId, pageable);
+        };
+    }
+
     public Comment update(String id, String content) {
         Comment comment = findById(id);
         if (content != null){
