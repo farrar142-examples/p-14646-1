@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @EnableElasticsearchRepositories
 @EnableElasticsearchAuditing
 public class BackApplication {
-//0002
+//0003
 	public static void main(String[] args) {
 		SpringApplication.run(BackApplication.class, args);
 	}
