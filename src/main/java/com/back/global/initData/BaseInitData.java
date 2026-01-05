@@ -8,6 +8,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
@@ -18,12 +20,13 @@ public class BaseInitData {
     public ApplicationRunner baseInitDataRunner (){
         return args->{
             work1();
+            work2();
         };
     }
 
     private void work1() {
         log.debug("Post entity 개수: {}", postService.count());
-
+        log.debug("샘플 Post 데이터 생성");
         if (postService.count() == 0) {
             for(int i = 1; i <= 10; i++) {
                 String title = "Sample Post Title " + i;
@@ -33,5 +36,12 @@ public class BaseInitData {
                 log.debug("Created Post: {}", post);
             }
         }
+    }
+
+    private void work2() {
+        log.debug("기존 Post 전체 조회");
+        postService.findAll().forEach( post ->
+                log.debug("Existing Post: {}", post)
+        );
     }
 }
